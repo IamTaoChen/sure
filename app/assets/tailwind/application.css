@@ -148,8 +148,9 @@
   }
 }
 
-/* Custom scrollbar implementation for Windows browsers */
-.windows {
+/* Custom scrollbar implementation for desktop browsers */
+.windows,
+.mac {
   ::-webkit-scrollbar {
     width: 4px;
   }
@@ -164,7 +165,8 @@
   }  
 }
 
-.scrollbar {
+.windows .scrollbar,
+.mac .scrollbar {
   &::-webkit-scrollbar {
     width: 4px;
   }
