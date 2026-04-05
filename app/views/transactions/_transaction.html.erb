@@ -57,7 +57,7 @@
                   <div class="truncate flex-shrink">
                     <% if transaction.transfer? %>
                       <%= link_to(
-                            entry.name,
+                            localized_transfer_name(entry, transaction.transfer),
                             transaction.transfer.present? ? transfer_path(transaction.transfer) : entry_path(entry),
                             data: {
                               turbo_frame: "drawer",

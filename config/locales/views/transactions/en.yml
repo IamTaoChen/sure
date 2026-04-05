@@ -59,6 +59,8 @@ en:
       tags_label: Tags
       tab_transactions: Transactions
       tab_upcoming: Upcoming
+      transfer: Transfer
+      loan_payment: Loan payment
       uncategorized: "(uncategorized)"
     activity_labels:
       buy: Buy
