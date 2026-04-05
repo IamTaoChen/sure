@@ -17,6 +17,7 @@ class TransfersController < ApplicationController
 
   def show
     @categories = Current.family.categories.alphabetically
+    @entry = @transfer.outflow_transaction.entry
   end
 
   def create

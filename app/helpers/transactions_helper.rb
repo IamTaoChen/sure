@@ -76,4 +76,24 @@ module TransactionsHelper
       }
     end
   end
+
+  # Returns the localized transfer display name for the given entry and transfer.
+  # Determines inflow/outflow perspective by comparing entry.id with inflow/outflow entry.id.
+  def localized_transfer_name(entry, transfer)
+    return entry.name unless transfer.present?
+
+    inflow_entry_id = transfer.inflow_transaction&.entry&.id
+    outflow_entry_id = transfer.outflow_transaction&.entry&.id
+
+    if entry.id == inflow_entry_id
+      # inflow side
+      t(transfer.payment? ? "transfer.payment_from" : "transfer.from", from_account: transfer.from_account&.name || "")
+    elsif entry.id == outflow_entry_id
+      # outflow side
+      t(transfer.payment? ? "transfer.payment_name" : "transfer.name", to_account: transfer.to_account&.name || "")
+    else
+      # fallback
+      entry.name
+    end
+  end
 end

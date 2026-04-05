@@ -14,5 +14,7 @@ zh-CN:
               must_have_single_currency: 转账必须使用单一货币
               outflow_cannot_be_in_multiple_transfers: 出账交易不能参与多次转账
   transfer:
-    name: 转账至 %{to_account}
-    payment_name: 付款至 %{to_account}
+    name: 转账至%{to_account}
+    from: 来自%{from_account}的转账
+    payment_name: 付款至%{to_account}
+    payment_from: 来自%{from_account}的付款
