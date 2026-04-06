@@ -133,6 +133,7 @@ class BudgetCategory < ApplicationRecord
       parent_budget = parent[:budgeted_spending] || 0
       return 0 if parent_budget == 0 && actual_spending == 0
       return 100 if parent_budget == 0 && actual_spending > 0
+      return 100 if parent.over_budget? && actual_spending > 0
       (actual_spending.to_f / parent_budget) * 100
     else
       budget_amount = self[:budgeted_spending] || 0
