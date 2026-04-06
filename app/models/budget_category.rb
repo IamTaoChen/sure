@@ -133,8 +133,13 @@ class BudgetCategory < ApplicationRecord
       parent_budget = parent[:budgeted_spending] || 0
       return 0 if parent_budget == 0 && actual_spending == 0
       return 100 if parent_budget == 0 && actual_spending > 0
+      # If parent is over budget, show 100% if this subcategory has any spending
       return 100 if parent.over_budget? && actual_spending > 0
-      (actual_spending.to_f / parent_budget) * 100
+      # Calculate percentage based on self's spending + available to spend of parent
+      budget_amount = actual_spending.to_f + parent.available_to_spend.to_f
+      return 0 if budget_amount == 0
+      percent = (actual_spending.to_f / budget_amount) * 100
+      [ percent, 100 ].min
     else
       budget_amount = self[:budgeted_spending] || 0
       return 0 if budget_amount == 0 && actual_spending == 0
