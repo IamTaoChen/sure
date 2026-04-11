@@ -25,42 +25,47 @@ class ExchangeRate::Importer
       return
     end
 
-    updated_rates = []
-    inverse_rates = []
+    rows = []
+    prev_rate = start_rate
 
-    # Because provider_rates contains -5days data
-    filtered_rates = provider_rates.select { |date, _| date >= effective_start_date }
-    filtered_rates.each do |date, r|
-      rate = r&.rate
-      unless rate.present? && rate.to_f > 0
-        Rails.logger.warn("Discarding invalid exchange rate for #{from}/#{to} on #{date}")
-        next
-      end
-
-      updated_rates << {
-        from_currency: from,
-        to_currency: to,
-        date: date,
-        rate: rate
-      }
-
-      # Compute and upsert inverse rates (e.g., EUR→USD from USD→EUR) to avoid
-      # separate API calls for the reverse direction.
-      inverse_rates << {
-        from_currency: to,
-        to_currency: from,
-        date: date,
-        rate: (BigDecimal("1") / BigDecimal(rate.to_s)).round(12)
-      }
+    unless prev_rate.present?
+      error = MissingStartRateError.new("Could not find a start rate for #{from} to #{to} between #{start_date} and #{end_date}")
+      Rails.logger.error(error.message)
+      Sentry.capture_exception(error)
+      return
     end
 
-    if updated_rates.any?
-      upsert_rows(updated_rates)
-      upsert_rows(inverse_rates)
-      Rails.logger.debug("Upserted #{updated_rates.size} rates for #{from} to #{to} between #{effective_start_date} and #{end_date}")
-      if filtered_rates.any?
-        Rails.logger.warn("No valid rates to sync for #{from} to #{to} between #{start_date} and #{end_date} after filtering provider response")
+    for date in effective_start_date..end_date
+      # If we're not clearing the cache, skip any dates that already have valid rates in the DB.
+      if !clear_cache
+        db_rate = db_rates[date]
+        if db_rate.present? && db_rate.rate.to_f > 0
+          # should we use db_rate as fallback for prev_rate
+          prev_rate = db_rate
+          next
+        end
       end
+
+      provider_rate = provider_rates[date]
+      if provider_rate.present? && provider_rate.rate.to_f > 0
+        final_rate = provider_rate
+        prev_rate = provider_rate
+      else
+        final_rate = prev_rate
+        Rails.logger.warn("Missing provider rate for #{from}/#{to} on #{date}, using previous #{prev_rate.date}")
+      end
+
+      rows << final_rate
+      # Compute and upsert inverse rates (e.g., EUR→USD from USD→EUR) to avoid
+      # separate API calls for the reverse direction.
+      if final_rate.rate.to_f > 0
+        rows << reverse_rate(final_rate)
+      end
+    end
+
+    if rows.any?
+      upsert_rows(rows)
+      Rails.logger.debug("Upserted #{rows.size} rates for #{from} to #{to} and reverse between #{effective_start_date} and #{end_date}")
     end
 
     # Also backfill inverse rows for any forward rates that existed in the DB
@@ -89,6 +94,12 @@ class ExchangeRate::Importer
       total_upsert_count
     end
 
+    # Since provider may not return values on weekends and holidays, we grab the first rate from the provider that is on or before the start date
+    def start_rate
+      provider_rate = provider_rates.select { |date, _| date <= effective_start_date }.max_by { |date, _| date }&.last
+      return provider_rate if provider_rate.present?
+      db_rates[effective_start_date] || db_rates[effective_start_date - 1.day]
+    end
 
     # No need to fetch/upsert rates for dates that we already have in the DB
     def effective_start_date
@@ -113,7 +124,8 @@ class ExchangeRate::Importer
 
         if provider_response.success?
           Rails.logger.debug("Fetched #{provider_response.data.size} rates from #{exchange_rate_provider.class.name} for #{from}/#{to} between #{provider_fetch_start_date} and #{end_date}")
-          provider_response.data.index_by(&:date)
+          provider_rates = provider_response.data.index_by(&:date)
+          provider_rates.select { |_, r| r.rate.to_f > 0 }
         else
           message = "#{exchange_rate_provider.class.name} could not fetch exchange rate pair from: #{from} to: #{to} between: #{effective_start_date} and: #{Date.current}.  Provider error: #{provider_response.error.message}"
           Rails.logger.warn(message)
@@ -134,12 +146,7 @@ class ExchangeRate::Importer
         next if existing_inverse_dates.include?(rate.date)
         next if rate.rate.to_f <= 0
 
-        {
-          from_currency: to,
-          to_currency: from,
-          date: rate.date,
-          rate: (BigDecimal("1") / BigDecimal(rate.rate.to_s)).round(12)
-        }
+        reverse_rate(rate)
       end
 
       upsert_rows(inverse_rows) if inverse_rows.any?
@@ -168,7 +175,20 @@ class ExchangeRate::Importer
     # America/New_York timezone. If the caller passes a future date we clamp
     # it to today so that upstream provider calls remain valid and predictable.
     def normalize_end_date(requested_end_date)
-      today_est = Date.current.in_time_zone("America/New_York").to_date
-      [ requested_end_date, today_est ].min
+      yesterday_zone = Time.zone.yesterday.to_date
+      [ requested_end_date, yesterday_zone ].min
     end
+
+    # Given a rate, computes the reverse rate (e.g., EUR→USD from USD→EUR) for the same date.
+    def reverse_rate(rate)
+      return nil if rate.nil? || rate.rate.to_f <= 0
+
+      {
+        from_currency: rate.to_currency,
+        to_currency: rate.from_currency,
+        date: rate.date,
+        rate: (BigDecimal("1") / BigDecimal(rate.rate.to_s)).round(12)
+      }
+    end
+
 end
