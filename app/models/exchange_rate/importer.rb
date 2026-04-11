@@ -32,7 +32,10 @@ class ExchangeRate::Importer
     filtered_rates = provider_rates.select { |date, _| date >= effective_start_date }
     filtered_rates.each do |date, r|
       rate = r&.rate
-      next unless rate.present? && rate.to_f > 0
+      unless rate.present? && rate.to_f > 0
+        Rails.logger.warn("Discarding invalid exchange rate for #{from}/#{to} on #{date}")
+        next
+      end
 
       updated_rates << {
         from_currency: from,
@@ -54,8 +57,10 @@ class ExchangeRate::Importer
     if updated_rates.any?
       upsert_rows(updated_rates)
       upsert_rows(inverse_rates)
-    else
-      Rails.logger.debug("No valid rates to sync for #{from} to #{to} between #{start_date} and #{end_date} after filtering provider response")
+      Rails.logger.debug("Upserted #{updated_rates.size} rates for #{from} to #{to} between #{effective_start_date} and #{end_date}")
+      if filtered_rates.any?
+        Rails.logger.warn("No valid rates to sync for #{from} to #{to} between #{start_date} and #{end_date} after filtering provider response")
+      end
     end
 
     # Also backfill inverse rows for any forward rates that existed in the DB
