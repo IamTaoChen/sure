@@ -99,7 +99,7 @@
                   tags: Current.family.tags.alphabetically,
                   selected_ids: @entry.entryable&.tag_ids || [],
                   label: t(".tags_label"),
-                  disabled: @entry.split_child? || !can_annotate_entry?,
+                  disabled: @entry.split_child?,
                   input_options: { "data-auto-submit-form-target": "auto" }
                 ) %>
     <% end %>
