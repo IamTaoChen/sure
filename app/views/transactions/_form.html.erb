@@ -84,6 +84,7 @@
 
   <%= render DS::Disclosure.new(title: t(".details")) do %>
     <%= f.fields_for :entryable do |ef| %>
+      <section class="space-y-1">
       <%= ef.collection_select :merchant_id,
                 Current.family.available_merchants_for(Current.user).alphabetically,
                 :id, :name,
@@ -92,6 +93,7 @@
                   variant: :logo,
                   searchable: true,
                   menu_placement: :auto } %>
+      <section class="space-y-1">
       <%= ef.select :tag_ids,
                     Current.family.tags.alphabetically.pluck(:name, :id),
                     {
@@ -101,10 +103,11 @@
                     },
                     { "data-controller": "multi-select" } %>
     <% end %>
+    <section class="space-y-1">
     <%= f.text_area :notes,
                     label: t(".note_label"),
                     placeholder: t(".note_placeholder"),
-                    rows: 5,
+                    rows: 2,
                     "data-auto-submit-form-target": "auto" %>
   <% end %>
 
