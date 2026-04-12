@@ -187,28 +187,19 @@
         <div class="px-3 py-2 space-y-2">
         <p class="text-xs text-secondary"><%= t("splits.show.description") %></p>
         <% @entry.child_entries.includes(:entryable).each do |child| %>
-          <div class="flex items-start p-2 rounded-lg border border-primary min-h-[56px]">
-            <div class="flex-1 min-w-0">
-              <span class="text-sm truncate"><%= child.name %></span>
+          <div class="grid grid-cols-2 md:grid-cols-3 items-center p-2 rounded-lg border border-primary min-h-[56px] gap-2 md:gap-0">
+            <div class="flex items-center gap-2 min-w-0 col-span-1 md:col-span-1">
+              <span class="block md:hidden"><%= render "transactions/transaction_category", transaction: child.entryable, variant: "mobile" %></span>
+              <span class="text-sm truncate text-primary"><%= child.name %></span>
             </div>
-            <div class="flex items-start justify-start shrink-0 text-left">
-              <span class="flex md:hidden">
-                <%= render "transactions/transaction_category",
-                    transaction: child.entryable,
-                    variant: "mobile" %>
-              </span>
-              <span class="hidden md:flex">
-                <%= render "transactions/transaction_category",
-                    transaction: child.entryable,
-                    variant: "desktop" %>
-              </span>
+            <div class="hidden md:flex items-start justify-left col-span-1">
+              <%= render "transactions/transaction_category", transaction: child.entryable, variant: "desktop" %>
             </div>
-            <div class="flex-1 flex justify-end">
-              <span class="text-sm font-medium privacy-sensitive <%= child.amount.negative? ? "text-green-600" : "text-primary" %>">
+            <div class="flex justify-end items-center col-span-1">
+              <span class="text-sm font-medium privacy-sensitive <%= child.amount.negative? ? 'text-green-600' : 'text-primary' %>">
                 <%= format_money(-child.amount_money) %>
               </span>
             </div>
-
           </div>
         <% end %>
           <div class="flex items-center gap-3 pt-2">
