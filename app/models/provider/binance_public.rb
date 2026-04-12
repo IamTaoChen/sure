@@ -20,7 +20,7 @@ class Provider::BinancePublic < Provider
   # dollar quote and is surfaced to users as USD. GBP is absent because
   # Binance has zero GBP trading pairs today; GBP-family users fall back to
   # USDT->USD via the app's FX conversion, same as HUF/CZK/PLN users.
-  SUPPORTED_QUOTES = %w[USDT EUR JPY BRL TRY].freeze
+  SUPPORTED_QUOTES = %w[USDT EUR JPY BRL TRY CNY].freeze
 
   # Binance quote asset -> user-facing currency & ticker suffix.
   QUOTE_TO_CURRENCY = {
@@ -28,6 +28,7 @@ class Provider::BinancePublic < Provider
     "EUR"  => "EUR",
     "JPY"  => "JPY",
     "BRL"  => "BRL",
+    "CNY"  => "CNY",
     "TRY"  => "TRY"
   }.freeze
 
@@ -252,6 +253,7 @@ class Provider::BinancePublic < Provider
     # not end with a supported quote currency.
     def parse_ticker(ticker)
       ticker_up = ticker.to_s.upcase
+      ticker_up = clean_ticker(ticker_up)
       SUPPORTED_QUOTES.each do |quote|
         display_currency = QUOTE_TO_CURRENCY[quote]
         next unless ticker_up.end_with?(display_currency)
@@ -262,6 +264,15 @@ class Provider::BinancePublic < Provider
         return { binance_pair: "#{base}#{quote}", base: base, display_currency: display_currency }
       end
       nil
+    end
+
+    def clean_ticker(ticker)
+      if ticker.include?(":")
+        # For tickers in the format "CRYPTO:BTCUSD", extract the part after "CRYPTO:"
+        ticker.split(":", 2).last
+      else
+        ticker
+      end
     end
 
     # Cached for 24h — exchangeInfo returns the full symbol universe (thousands

@@ -66,7 +66,7 @@ class Security < ApplicationRecord
   # is the Binance ISO MIC — when we add a second crypto provider, extend
   # this check rather than duplicating the test at every call site.
   def crypto?
-    exchange_operating_mic == Provider::BinancePublic::BINANCE_MIC
+    exchange_operating_mic == Provider::BinancePublic::BINANCE_MIC || ticker&.start_with?("CRYPTO:")
   end
 
   # Strips the display-currency suffix from a crypto ticker (BTCUSD -> BTC,
@@ -74,12 +74,19 @@ class Security < ApplicationRecord
   # doesn't end in a supported quote.
   def crypto_base_asset
     return nil unless crypto?
+
+    pure_ticker = ticker
+    if ticker.include?(":")
+      # For tickers in the format "CRYPTO:BTCUSD", extract the part after "CRYPTO:"
+      pure_ticker = pure_ticker.split(":", 2).last
+    end
+
     Provider::BinancePublic::QUOTE_TO_CURRENCY.each_value do |suffix|
-      next unless ticker.end_with?(suffix)
-      base = ticker.delete_suffix(suffix)
+      next unless pure_ticker.end_with?(suffix)
+      base = pure_ticker.delete_suffix(suffix)
       return base unless base.empty?
     end
-    nil
+    pure_ticker
   end
 
   # Single source of truth for which logo URL the UI should render. Crypto
