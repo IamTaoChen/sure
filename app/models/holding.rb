@@ -33,7 +33,6 @@ class Holding < ApplicationRecord
   def name
     @name ||= begin
       if security.crypto?
-        Rails.logger.error("Tau - Holding#name crypto? ticker: #{ticker}, base_asset: #{security.crypto_base_asset}") # DEBUG
         security.crypto_base_asset || ticker
       else
         security.name || ticker

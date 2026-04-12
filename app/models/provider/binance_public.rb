@@ -263,7 +263,11 @@ class Provider::BinancePublic < Provider
 
         return { binance_pair: "#{base}#{quote}", base: base, display_currency: display_currency }
       end
-      nil
+      {
+        binance_pair: "#{ticker_up}USD",
+        base: ticker_up,
+        display_currency: "USD"
+      }
     end
 
     def clean_ticker(ticker)
