@@ -185,18 +185,32 @@
     <% if @entry.split_parent? %>
       <% dialog.with_section(title: t("splits.show.title"), open: true) do %>
         <div class="px-3 py-2 space-y-2">
-          <p class="text-xs text-secondary"><%= t("splits.show.description") %></p>
-          <% @entry.child_entries.includes(:entryable).each do |child| %>
-            <div class="flex items-center justify-between p-2 rounded-lg border border-primary">
-              <div>
-                <p class="text-sm font-medium text-primary"><%= child.name %></p>
-                <p class="text-xs text-secondary"><%= child.entryable.try(:category)&.name || t("splits.new.uncategorized") %></p>
-              </div>
-              <p class="text-sm font-medium privacy-sensitive <%= child.amount.negative? ? "text-green-600" : "text-primary" %>">
-                <%= format_money(-child.amount_money) %>
-              </p>
+        <p class="text-xs text-secondary"><%= t("splits.show.description") %></p>
+        <% @entry.child_entries.includes(:entryable).each do |child| %>
+          <div class="flex items-start p-2 rounded-lg border border-primary min-h-[56px]">
+            <div class="flex-1 min-w-0">
+              <span class="text-sm truncate"><%= child.name %></span>
             </div>
-          <% end %>
+            <div class="flex items-start justify-start shrink-0 text-left">
+              <span class="flex md:hidden">
+                <%= render "transactions/transaction_category",
+                    transaction: child.entryable,
+                    variant: "mobile" %>
+              </span>
+              <span class="hidden md:flex">
+                <%= render "transactions/transaction_category",
+                    transaction: child.entryable,
+                    variant: "desktop" %>
+              </span>
+            </div>
+            <div class="flex-1 flex justify-end">
+              <span class="text-sm font-medium privacy-sensitive <%= child.amount.negative? ? "text-green-600" : "text-primary" %>">
+                <%= format_money(-child.amount_money) %>
+              </span>
+            </div>
+
+          </div>
+        <% end %>
           <div class="flex items-center gap-3 pt-2">
             <%= render DS::Link.new(
               text: t("splits.child.edit_split"),
