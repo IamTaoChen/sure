@@ -125,7 +125,7 @@
         <%= f.text_area :notes,
                 label: t(".note_label"),
                 placeholder: t(".note_placeholder"),
-                rows: 5,
+                rows: 2,
                 disabled: @entry.split_child? || !can_annotate_entry?,
                 "data-auto-submit-form-target": "auto" %>
       <% end %>
