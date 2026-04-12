@@ -31,7 +31,18 @@ class Holding < ApplicationRecord
   delegate :ticker, to: :security
 
   def name
-    security.name || ticker
+    @name ||= begin
+      if security.crypto?
+        Rails.logger.error("Tau - Holding#name crypto? ticker: #{ticker}, base_asset: #{security.crypto_base_asset}") # DEBUG
+        security.crypto_base_asset || ticker
+      else
+        security.name || ticker
+      end
+    end
+  end
+
+  def type_name
+    @type_name ||= security.crypto? ? "CRYPTO" : name
   end
 
   def weight

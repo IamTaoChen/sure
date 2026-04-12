@@ -43,16 +43,16 @@
               <tr class="<%= idx < holdings.size - 1 ? "border-b border-divider" : "" %>">
                 <td class="p-4">
                   <div class="flex items-center gap-3">
-                    <% if holding.security.logo_url.present? %>
-                      <img src="<%= holding.security.logo_url %>" alt="<%= holding.ticker %>" class="w-8 h-8 rounded-full">
+                    <% if holding.security.display_logo_url.present? %>
+                      <img src="<%= holding.security.display_logo_url %>" alt="<%= holding.ticker %>" class="w-8 h-8 rounded-full">
                     <% else %>
                       <div class="w-8 h-8 rounded-full bg-container-inset flex items-center justify-center text-xs font-medium text-secondary">
                         <%= holding.ticker.to_s.first(2).presence || "—" %>
                       </div>
                     <% end %>
                     <div class="max-w-32">
-                      <p class="font-medium truncate"><%= holding.ticker %></p>
-                      <p class="text-xs text-secondary"><%= truncate(holding.name, length: 20) %></p>
+                      <p class="font-medium truncate"><%= holding.name %></p>
+                      <p class="text-xs text-secondary"><%= truncate(holding.type_name, length: 20) %></p>
                     </div>
                   </div>
                 </td>
