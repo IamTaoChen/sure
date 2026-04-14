@@ -6,7 +6,7 @@
 
     <%= render UI::Account::Chart.new(account: account, period: chart_period, view: chart_view, currency: chart_currency) %>
 
-    <% if (fx_coverage_start = fx_coverage_start_date).present? %>
+    <% if limited_fx_history_warning? %>
       <div class="px-3">
         <%= render DS::Alert.new(
           message: t("accounts.show.limited_fx_history_warning", date: l(fx_coverage_start, format: :long)),
