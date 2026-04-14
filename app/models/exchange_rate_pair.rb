@@ -32,7 +32,7 @@ class ExchangeRatePair < ApplicationRecord
 
     ExchangeRatePair
       .where(id: pair.id)
-      .where("first_provider_rate_on IS NULL OR first_provider_rate_on > ?", date)
+      .where("first_provider_rate_on IS NULL OR first_provider_rate_on < ?", date)
       .update_all(
         first_provider_rate_on: date,
         provider_name: current_provider,
