@@ -52,6 +52,7 @@ class ExchangeRate::Importer
       return
     end
 
+    no_gap = true
     # Gapfill with LOCF strategy (last observation carried forward):
     # when the provider returns nothing for weekends/holidays, carry the previous rate.
     gapfilled_rates = loop_start_date.upto(end_date).map do |date|
@@ -59,11 +60,13 @@ class ExchangeRate::Importer
       provider_rate_value = provider_rates[date]&.rate
 
       chosen_rate = if provider_rate_value.present? && provider_rate_value.to_f > 0
-        earliest_valid_provider_date = date
+        earliest_valid_provider_date = no_gap ? date : earliest_valid_provider_date
         provider_rate_value
       elsif db_rate_value.present? && db_rate_value.to_f > 0
+        no_gap = false
         db_rate_value
       else
+        no_gap = false
         prev_rate_value
       end
 
