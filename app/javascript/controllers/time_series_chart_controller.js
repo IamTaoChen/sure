@@ -509,7 +509,8 @@ export default class extends Controller {
     return d3
       .line()
       .x((d) => this._d3XScale(d.date))
-      .y((d) => this._d3YScale(this._getDatumValue(d)));
+      .y((d) => this._d3YScale(this._getDatumValue(d)))
+      .curve(d3.curveMonotoneX);
   }
 
   get _d3XScale() {
