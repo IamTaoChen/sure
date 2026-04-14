@@ -66,9 +66,9 @@ class UI::AccountPage < ApplicationComponent
   end
 
   def limited_fx_history_warning?
-    return false unless fx_coverage_start_date
+    return false unless fx_coverage_start_date.present?
 
-    (Time.zone.today - fx_coverage_start_date) <= 5.days
+    (Time.zone.today - fx_coverage_start_date) > 5.days
   end
 
 
