@@ -9,7 +9,7 @@
     <% if limited_fx_history_warning? %>
       <div class="px-3">
         <%= render DS::Alert.new(
-          message: t("accounts.show.limited_fx_history_warning", date: l(fx_coverage_start, format: :long)),
+          message: t("accounts.show.limited_fx_history_warning", date: l(fx_coverage_start_date, format: :long)),
           variant: :warning
         ) %>
       </div>
