@@ -1,10 +1,11 @@
 class UI::Account::Chart < ApplicationComponent
   attr_reader :account
 
-  def initialize(account:, period: nil, view: nil)
+  def initialize(account:, period: nil, view: nil, currency: nil)
     @account = account
     @period = period
     @view = view
+    @currency = currency
   end
 
   def period
@@ -66,8 +67,12 @@ class UI::Account::Chart < ApplicationComponent
     @view ||= "balance"
   end
 
+  def currency
+    @currency ||= account.currency
+  end
+
   def series
-    account.balance_series(period: period, view: view)
+    account.balance_series(period: period, view: view, currency: currency)
   end
 
   def trend

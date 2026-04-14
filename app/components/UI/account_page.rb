@@ -1,13 +1,14 @@
 class UI::AccountPage < ApplicationComponent
-  attr_reader :account, :chart_view, :chart_period
+  attr_reader :account, :chart_view, :chart_period, :chart_currency
 
   renders_one :activity_feed, ->(feed_data:, pagy:, search:) { UI::Account::ActivityFeed.new(feed_data: feed_data, pagy: pagy, search: search) }
 
-  def initialize(account:, chart_view: nil, chart_period: nil, active_tab: nil)
+  def initialize(account:, chart_view: nil, chart_period: nil, active_tab: nil, chart_currency: nil)
     @account = account
     @chart_view = chart_view
     @chart_period = chart_period
     @active_tab = active_tab
+    @chart_currency = chart_currency
   end
 
   def id

@@ -43,6 +43,7 @@ class AccountsController < ApplicationController
 
   def show
     @chart_view = params[:chart_view] || "balance"
+    @chart_currency = params[:chart_currency]
     @tab = params[:tab]
     @q = params.fetch(:q, {}).permit(:search, status: [])
     entries = @account.entries.where(excluded: false).search(@q).reverse_chronological
