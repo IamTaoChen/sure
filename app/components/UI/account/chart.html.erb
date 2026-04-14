@@ -10,7 +10,7 @@
       </div>
       <div class="flex flex-row gap-2 items-baseline">
         <%= tag.p view_balance_money.format, class: "text-primary text-3xl font-medium truncate privacy-sensitive" %>
-
+        
         <% if converted_balance_money %>
           <%= tag.p converted_balance_money.format, class: "text-sm font-medium text-secondary privacy-sensitive" %>
         <% end %>
@@ -19,6 +19,16 @@
 
     <%= form_with url: account_path(account), method: :get, data: { controller: "auto-submit-form" } do |form| %>
       <div class="flex items-center gap-2">
+        <% if foreign_currency? %>
+          <%= form.select :chart_currency,
+            [
+              ["#{account.currency}", account.currency],
+              ["#{account.family.currency}", account.family.currency]
+            ],
+            { selected: currency || account.currency },
+            data: { "auto-submit-form-target": "auto" },
+            class: "bg-container border border-secondary rounded-lg px-3 py-2 text-sm pr-7 cursor-pointer text-primary focus:outline-hidden focus:ring-0" %>
+        <% end %>
         <% if account.investment? %>
           <%= form.select :chart_view,
             [["Total value", "balance"], ["Holdings", "holdings_balance"], ["Cash", "cash_balance"]],
@@ -26,7 +36,6 @@
             class: "bg-container border border-secondary rounded-lg text-sm pr-7 cursor-pointer text-primary focus:outline-hidden focus:ring-0",
             data: { "auto-submit-form-target": "auto" } %>
         <% end %>
-
         <%= form.select :period,
                     Period.as_options,
                     { selected: period.key },
