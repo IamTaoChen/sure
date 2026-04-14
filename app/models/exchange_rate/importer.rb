@@ -59,6 +59,7 @@ class ExchangeRate::Importer
       provider_rate_value = provider_rates[date]&.rate
 
       chosen_rate = if provider_rate_value.present? && provider_rate_value.to_f > 0
+        earliest_valid_provider_date = date
         provider_rate_value
       elsif db_rate_value.present? && db_rate_value.to_f > 0
         db_rate_value
@@ -267,10 +268,10 @@ class ExchangeRate::Importer
                   .index_by(&:date)
     end
 
-    # Normalizes an end date so that it never exceeds today's date in the
-    # America/New_York timezone.
+    # Normalizes an end date so that it never exceeds today's date in the User's timezone,
+    # to avoid confusion when providers return no future rates (e.g., for the current day).
     def normalize_end_date(requested_end_date)
-      today_est = Date.current.in_time_zone("America/New_York").to_date
-      [ requested_end_date, today_est ].min
+      yesterday_zone = Time.zone.yesterday.to_date
+      [ requested_end_date, yesterday_zone ].min
     end
 end
