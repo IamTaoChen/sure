@@ -59,6 +59,7 @@ class ExchangeRate::Importer
       provider_rate_value = provider_rates[date]&.rate
 
       chosen_rate = if provider_rate_value.present? && provider_rate_value.to_f > 0
+        earliest_valid_provider_date = date
         provider_rate_value
       elsif db_rate_value.present? && db_rate_value.to_f > 0
         db_rate_value
