@@ -64,6 +64,13 @@ class UI::AccountPage < ApplicationComponent
     @fx_coverage_start_date = result
   end
 
+  def limited_fx_history_warning?
+    return false unless fx_coverage_start_date
+
+    (Time.zone.today - fx_coverage_start_date) <= 5.days
+  end
+
+
   def tab_content_for(tab)
     case tab
     when :activity
