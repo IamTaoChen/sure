@@ -117,6 +117,19 @@ class Period
       all.map { |period| [ period.label_short, period.key ] }
     end
 
+    def as_ds_options
+      all.map do |period|
+        {
+          value: period.key,
+          label: period.label_short,
+          object: period,
+          start_date: period.start_date,
+          end_date: period.end_date
+        }
+      end
+    end
+
+
     def current_month_for(family)
       return from_key("current_month") unless family&.uses_custom_month_start?
 
