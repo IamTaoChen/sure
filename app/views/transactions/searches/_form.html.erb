@@ -16,6 +16,16 @@
                             "data-auto-submit-form-target": "auto" %>
       </div>
     </div>
+    
+    <%= render DS::Select.new(
+          form: form,
+          method: :period,
+          items: Period.as_ds_options,
+          selected: (@q["start_date"].present? || @q["end_date"].present?) ? nil : @q["period"].presence,
+          placeholder: "Period",
+          menu_placement: :auto,
+          data: { "auto-submit-form-target": "auto" }
+    ) %>
 
     <%= render DS::Menu.new(variant: "button", no_padding: true) do |menu| %>
       <% menu.with_button(

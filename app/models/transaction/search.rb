@@ -21,7 +21,7 @@ class Transaction::Search
   def initialize(family, filters: {}, accessible_account_ids: nil)
     @family = family
     @accessible_account_ids = accessible_account_ids
-    super(filters)
+    super(normalize_period(filters))
   end
 
   def transactions_scope
@@ -216,5 +216,20 @@ class Transaction::Search
       else
         query
       end
+    end
+
+    def normalize_period(filters)
+      filters = filters.to_h.symbolize_keys
+      key = filters[:period]
+      unless key.present? && Period::PERIODS.key?(key)
+        return filters.except(:period)
+      end
+      period = Period.from_key(key)
+      filters
+        .merge(
+          start_date: period.start_date.to_date.iso8601,
+          end_date: period.end_date.to_date.iso8601
+        )
+        .except(:period)
     end
 end
