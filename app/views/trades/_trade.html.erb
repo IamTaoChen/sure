@@ -47,11 +47,9 @@
             <%= icon "lock", size: "sm", class: "text-secondary" %>
           <% end %>
         <% end %>
-
-        <p class="<%= entry.amount.negative? ? 'text-green-600' : '' %>">
-          <%= format_money(-entry.amount_money) %>
-        </p>
-
+        <%= content_tag :p,
+                    format_money(-entry.amount_money),
+                    class: ["privacy-sensitive", "text-green-600": entry.amount.negative?] %>
       </div>
     </div>
 
