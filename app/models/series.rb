@@ -10,7 +10,7 @@ class Series
     values.each(&block)
   end
 
-  attr_reader :start_date, :end_date, :interval, :trend, :values, :favorable_direction
+  attr_reader :start_date, :end_date, :interval, :trend, :values, :favorable_direction, :prev_value
 
   Value = Struct.new(
     :date,
@@ -48,19 +48,20 @@ class Series
     end
   end
 
-  def initialize(start_date:, end_date:, interval:, values:, favorable_direction: "up")
+  def initialize(start_date:, end_date:, interval:, values:, favorable_direction: "up", prev_value: nil)
     @start_date = start_date
     @end_date = end_date
     @interval = interval
     @values = values
     @favorable_direction = favorable_direction
+    @prev_value = prev_value
   end
 
   def trend
     return nil if values.blank?
     @trend ||= Trend.new(
       current: values.last&.value,
-      previous: values.first&.value,
+      previous: @prev_value || values.first&.value,
       favorable_direction: favorable_direction
     )
   end

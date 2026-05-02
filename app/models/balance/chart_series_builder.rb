@@ -29,17 +29,26 @@ class Balance::ChartSeriesBuilder
   end
 
   private
-    attr_reader :account_ids, :currency, :period, :favorable_direction
+    attr_reader :account_ids, :currency, :period, :favorable_direction, :prev_day_value
 
     def interval
       @interval || period.interval
     end
 
+    def prev_day_value
+      @prev_day_value ||= begin
+        query_data
+        if @prev_day_record
+          Money.new(@prev_day_record.end_balance, currency)
+        else
+          nil
+        end
+      end
+    end
+
     def build_series_for(column)
-      data = query_data
-      initial_value = data.first&.send(column)
-      previous_value = initial_value && Money.new(initial_value, currency)
-      values = data.drop(1).map do |datum|
+      previous_value = @prev_day_value
+      values = query_data.map do |datum|
         current_value = Money.new(datum.send(column), currency)
 
         series_value = Series::Value.new(
@@ -62,17 +71,25 @@ class Balance::ChartSeriesBuilder
         end_date: period.end_date,
         interval: interval,
         values: values,
-        favorable_direction: favorable_direction
+        favorable_direction: favorable_direction,
+        prev_value: @prev_day_value
       )
     end
 
     def query_data
-      @query_data ||= Balance.find_by_sql([
+      return @query_data if defined?(@query_data)
+      raw_data = fetch_query_data(add_prev_day: true)
+      @prev_day_record = raw_data.first
+      @query_data = raw_data.drop(1)
+    end
+
+    def fetch_query_data(add_prev_day: false)
+      Balance.find_by_sql([
         query,
         {
           account_ids: account_ids,
           target_currency: currency,
-          start_date: period.start_date.prev_day,
+          start_date: add_prev_day ? period.start_date.prev_day : period.start_date,
           end_date: period.end_date,
           interval: interval,
           sign_multiplier: sign_multiplier
