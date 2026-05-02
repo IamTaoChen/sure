@@ -61,7 +61,7 @@ class Series
     return nil if values.blank?
     @trend ||= Trend.new(
       current: values.last&.value,
-      previous: @init_value&.value || values.first&.value,
+      previous: @init_value || values.first&.value,
       favorable_direction: favorable_direction
     )
   end

@@ -63,7 +63,7 @@ class Balance::ChartSeriesBuilder
         interval: interval,
         values: values,
         favorable_direction: favorable_direction,
-        init_value: @init_value
+        init_value: init_value
       )
     end
 
