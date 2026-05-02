@@ -35,19 +35,10 @@ class Balance::ChartSeriesBuilder
       @interval || period.interval
     end
 
-    def prev_day_value
-      @prev_day_value ||= begin
-        query_data
-        if @prev_day_record
-          Money.new(@prev_day_record.end_balance, currency)
-        else
-          nil
-        end
-      end
-    end
-
     def build_series_for(column)
-      previous_value = @prev_day_value
+      query_data
+      init_value = Money.new(@prev_day_record.send(column), currency)
+      previous_value = init_value
       values = query_data.map do |datum|
         current_value = Money.new(datum.send(column), currency)
 
@@ -72,7 +63,7 @@ class Balance::ChartSeriesBuilder
         interval: interval,
         values: values,
         favorable_direction: favorable_direction,
-        prev_value: @prev_day_value
+        init_value: @init_value
       )
     end
 
