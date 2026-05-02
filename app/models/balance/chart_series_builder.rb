@@ -36,8 +36,10 @@ class Balance::ChartSeriesBuilder
     end
 
     def build_series_for(column)
-      previous_value = nil
-      values = query_data.map do |datum|
+      data = query_data
+      initial_value = data.first&.send(column)
+      previous_value = initial_value && Money.new(initial_value, currency)
+      values = data.drop(1).map do |datum|
         current_value = Money.new(datum.send(column), currency)
 
         series_value = Series::Value.new(
@@ -70,7 +72,7 @@ class Balance::ChartSeriesBuilder
         {
           account_ids: account_ids,
           target_currency: currency,
-          start_date: period.start_date,
+          start_date: period.start_date.prev_day,
           end_date: period.end_date,
           interval: interval,
           sign_multiplier: sign_multiplier
