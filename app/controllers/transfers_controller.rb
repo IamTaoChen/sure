@@ -11,6 +11,7 @@ class TransfersController < ApplicationController
 
   def show
     @categories = Current.family.categories.alphabetically
+    @entry = @transfer.outflow_transaction.entry
 
     # Whether the current user can hit `mark_as_recurring`: feature flag on,
     # AND they have write access to BOTH transfer endpoints. Gating the
