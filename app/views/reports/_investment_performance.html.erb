@@ -88,7 +88,7 @@
                       </div>
                     </div>
                   </td>
-                  <td class="py-3 px-4 lg:px-6 text-right text-secondary"><%= number_to_percentage(holding.weight || 0, precision: 1) %></td>
+                  <td class="py-3 px-4 lg:px-6 text-right text-secondary"><%= number_to_percentage(Current.family.investment_statement.holding_weight(holding) || 0, precision: 1) %></td>
                   <td class="py-3 px-4 lg:px-6 text-right font-medium text-primary privacy-sensitive"><%= format_money(holding.amount_money) %></td>
                   <td class="py-3 px-4 lg:px-6 text-right">
                     <% if holding.trend %>
