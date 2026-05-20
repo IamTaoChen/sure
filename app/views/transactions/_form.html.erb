@@ -86,22 +86,24 @@
     <%= f.fields_for :entryable do |ef| %>
       <section class="space-y-1">
       <%= ef.collection_select :merchant_id,
-                Current.family.available_merchants_for(Current.user).alphabetically,
-                :id, :name,
-                { include_blank: t(".none"),
-                  label: t(".merchant_label"),
-                  variant: :logo,
-                  searchable: true,
-                  menu_placement: :auto } %>
+          Current.family.available_merchants_for(Current.user).alphabetically,
+          :id, :name,
+          { include_blank: t(".none"),
+            label: t(".merchant_label"),
+            variant: :logo,
+            searchable: true,
+            menu_placement: :auto } 
+      %>
       <%= render DS::MultiSelectTags.new(
-                  form: ef,
-                  method: :tag_ids,
-                  tags: Current.family.tags.alphabetically,
-                  selected_ids: @entry.entryable&.tag_ids || [],
-                  label: t(".tags_label"),
-                  disabled: @entry.split_child?,
-                  input_options: { "data-auto-submit-form-target": "auto" }
-                ) %>
+          form: ef,
+          method: :tag_ids,
+          tags: Current.family.tags.alphabetically,
+          selected_ids: @entry.entryable&.tag_ids || [],
+          label: t(".tags_label"),
+          disabled: @entry.split_child?,
+          input_options: { "data-auto-submit-form-target": "auto" }
+        ) 
+      %>
     <% end %>
     <section class="space-y-1">
     <%= f.text_area :notes,
