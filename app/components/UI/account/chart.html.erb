@@ -10,7 +10,7 @@
       </div>
       <div class="flex flex-row gap-2 items-baseline">
         <%= tag.p view_balance_money.format, class: "text-primary text-3xl font-medium truncate privacy-sensitive" %>
-        
+
         <% if converted_balance_money %>
           <%= tag.p converted_balance_money.format, class: "text-sm font-medium text-secondary privacy-sensitive" %>
         <% end %>
@@ -36,6 +36,7 @@
             class: "bg-container border border-secondary rounded-lg text-sm pr-7 cursor-pointer text-primary focus:outline-hidden focus:ring-0",
             data: { "auto-submit-form-target": "auto" } %>
         <% end %>
+
         <%= form.select :period,
                     Period.as_options,
                     { selected: period.key },
