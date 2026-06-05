@@ -30,6 +30,7 @@
             <%= form.combobox :ticker,
                             securities_path(country_code: Current.family.country),
                             name_when_new: "model[manual_ticker]",
+                            data: {allow_free_input: true},
                             label: t(".holding"),
                             placeholder: t(".ticker_placeholder"),
                             required: true %>

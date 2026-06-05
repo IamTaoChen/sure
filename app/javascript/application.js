@@ -45,6 +45,20 @@ HwComboboxController.prototype._filterAsync = async function(inputType) {
   }
 };
 
+// Fix: when allowNew is enabled and the user has typed a value that hasn't been
+// committed yet (e.g., async response is still pending or was aborted on close),
+// commit it as a new option instead of clearing the input.
+HwComboboxController.prototype._clearInvalidQuery = function() {
+  if (this._allowNew && this._isQueried && this._hasEmptyFieldValue) {
+    this._selectNew()
+    return
+  }
+  if (this._isUnjustifiablyBlank) {
+    this._deselect()
+    this._clearQuery()
+  }
+}
+
 Turbo.StreamActions.redirect = function () {
   // Use "replace" to avoid adding form submission to browser history
   Turbo.visit(this.target, { action: "replace" });
