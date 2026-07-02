@@ -5,7 +5,11 @@ class Category < ApplicationRecord
   belongs_to :family
 
   has_many :budget_categories, dependent: :destroy
-  has_many :subcategories, class_name: "Category", foreign_key: :parent_id, dependent: :nullify
+  has_many :subcategories,
+         -> { order(:name) },
+         class_name: "Category",
+         foreign_key: :parent_id,
+         dependent: :nullify
   belongs_to :parent, class_name: "Category", optional: true
 
   validates :name, :color, :lucide_icon, :family, presence: true
@@ -96,8 +100,10 @@ class Category < ApplicationRecord
     delegate :name, :color, to: :category
 
     def self.for(categories)
-      categories.select { |category| category.parent_id.nil? }.map do |category|
-        new(category, category.subcategories)
+      categories_by_parent_id = categories.to_a.group_by(&:parent_id)
+
+      categories_by_parent_id[nil].to_a.map do |category|
+        new(category, categories_by_parent_id[category.id].to_a)
       end
     end
 

@@ -14,6 +14,68 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
+  test "update_preferences persists dashboard section layout height" do
+    patch "/dashboard/preferences", params: {
+      preferences: { dashboard_section_layout: { net_worth_chart: { height: "compact" } } }
+    }, as: :json
+
+    assert_response :ok
+    assert_equal "compact", @user.reload.dashboard_section_height("net_worth_chart")
+  end
+
+  test "update_preferences persists dashboard section width" do
+    patch "/dashboard/preferences", params: {
+      preferences: { dashboard_section_layout: { cashflow_sankey: { col_span: "single" } } }
+    }, as: :json
+
+    assert_response :ok
+    assert_equal "single", @user.reload.dashboard_section_width("cashflow_sankey")
+  end
+
+  test "update_preferences ignores malformed dashboard_section_layout without erroring" do
+    previous_height = @user.reload.dashboard_section_height("net_worth_chart")
+
+    patch "/dashboard/preferences", params: {
+      preferences: { dashboard_section_layout: "not-a-hash" }
+    }, as: :json
+
+    assert_response :ok
+    assert_equal previous_height, @user.reload.dashboard_section_height("net_worth_chart")
+  end
+
+  test "dashboard memoizes income statement period totals while rendering" do
+    income_statement = IncomeStatement.new(@family)
+    IncomeStatement.stubs(:new).returns(income_statement)
+
+    fake_expense_period_total = IncomeStatement::PeriodTotal.new(
+      classification: "expense",
+      total: 0,
+      currency: @family.currency,
+      category_totals: []
+    )
+
+    fake_income_period_total = IncomeStatement::PeriodTotal.new(
+      classification: "income",
+      total: 0,
+      currency: @family.currency,
+      category_totals: []
+    )
+
+    income_statement.expects(:build_period_total)
+      .with(classification: "expense", period: kind_of(Period))
+      .once
+      .returns(fake_expense_period_total)
+
+    income_statement.expects(:build_period_total)
+      .with(classification: "income", period: kind_of(Period))
+      .once
+      .returns(fake_income_period_total)
+
+    get root_path
+
+    assert_response :ok
+  end
+
   test "intro page requires guest role" do
     get intro_path
 
