@@ -1,14 +1,11 @@
 <%# locals: (entry:, balance_trend: nil, view_ctx: "global", in_split_group: false) %>
-<% 
-  transaction = entry.entryable
-  transaction_security_logo_url = transaction.activity_security&.display_logo_url
-  merchant_logo_url = transaction.merchant&.logo_url.presence
-  logo_url = transaction_security_logo_url || merchant_logo_url
-%>
+
+<% transaction = entry.entryable %>
+<% transaction_security_logo_url = transaction.activity_security&.display_logo_url %>
 
 <%= turbo_frame_tag dom_id(entry) do %>
   <%= turbo_frame_tag dom_id(transaction) do %>
-    <div class="group flex lg:grid lg:grid-cols-12 items-center text-primary text-sm font-medium p-3 lg:p-4">
+    <div class="group flex lg:grid lg:grid-cols-12 items-center text-primary text-sm font-medium p-3 lg:p-4 <%= "pl-8 lg:pl-12" if in_split_group %>">
 
       <div class="pr-4 lg:pr-10 flex items-center gap-3 lg:gap-4 col-span-7 min-w-0">
         <%= check_box_tag dom_id(entry, "selection"),
@@ -24,14 +21,20 @@
 
         <div class="flex md:hidden items-center gap-1 col-span-2 relative shrink-0">
           <%= render "transactions/transaction_category", transaction: transaction, variant: "mobile", in_split_group: in_split_group %>
-          <% if logo_url %>
-            <%= render "entries/logo", name: entry.name, logo_url: logo_url, size: :sm ,add_cls_attr: "absolute -bottom-1 -right-1 pointer-events-none"%>
+          <% if transaction_security_logo_url.present? %>
+            <%= image_tag Setting.transform_brand_fetch_url(transaction_security_logo_url),
+                class: "w-5 h-5 rounded-full absolute -bottom-1 -right-1 border border-secondary pointer-events-none",
+                loading: "lazy" %>
+          <% elsif transaction.merchant&.logo_url.present? %>
+            <%= image_tag Setting.transform_brand_fetch_url(transaction.merchant.logo_url),
+                class: "w-5 h-5 rounded-full absolute -bottom-1 -right-1 border border-secondary pointer-events-none",
+                loading: "lazy" %>
           <% end %>
         </div>
 
         <div class="max-w-full min-w-0 <%= "opacity-50 text-secondary" if entry.excluded %>">
           <%= content_tag :div, class: ["flex items-center gap-3 lg:gap-4"] do %>
-            <div class="hidden md:flex">
+            <div class="hidden lg:flex">
               <% if transaction.transfer? %>
                 <%= render DS::FilledIcon.new(
                   icon: "arrow-right-left",
@@ -39,8 +42,23 @@
                   size: "lg",
                   rounded: true
                 ) %>
+              <% elsif transaction_security_logo_url.present? %>
+                <%= image_tag Setting.transform_brand_fetch_url(transaction_security_logo_url),
+                    class: "w-9 h-9 rounded-full border border-secondary",
+                    loading: "lazy" %>
+              <% elsif transaction.merchant&.logo_url.present? %>
+                <%= image_tag Setting.transform_brand_fetch_url(transaction.merchant.logo_url),
+                    class: "w-9 h-9 rounded-full border border-secondary",
+                    loading: "lazy" %>
               <% else %>
-                <%= render "entries/logo", name: entry.name, logo_url: logo_url, size: :lg %>
+                <div class="hidden lg:flex">
+                  <%= render DS::FilledIcon.new(
+                    variant: :text,
+                    text: entry.name,
+                    size: "lg",
+                    rounded: true
+                  ) %>
+                </div>
               <% end %>
             </div>
 
@@ -50,7 +68,7 @@
                   <div class="truncate flex-shrink">
                     <% if transaction.transfer? %>
                       <%= link_to(
-                            localized_transfer_name(entry, transaction.transfer),
+                            entry.name,
                             transaction.transfer.present? ? transfer_path(transaction.transfer) : entry_path(entry),
                             data: {
                               turbo_frame: "drawer",
