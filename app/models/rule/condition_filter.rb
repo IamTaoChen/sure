@@ -5,12 +5,16 @@ class Rule::ConditionFilter
 
   OPERATORS_MAP = {
     "text" => [ [ "Contains", "like" ], [ "Equal to", "=" ], [ "Is empty", "is_null" ] ],
-    "number" => [ [ "Greater than", ">" ], [ "Greater or equal to", ">=" ], [ "Less than", "<" ], [ "Less than or equal to", "<=" ], [ "Is equal to", "=" ] ],
+    "number" => [ [ "Greater than", ">" ], [ "Greater or equal to", ">=" ], [ "Less than", "<" ], [ "Less than or equal to", "<=" ], [ "Is equal to", "=" ], [ "Is not equal to", "!=" ] ],
     "select" => [ [ "Equal to", "=" ], [ "Is empty", "is_null" ] ]
   }
 
   def initialize(rule)
     @rule = rule
+  end
+
+  def self.key
+    name.demodulize.underscore
   end
 
   def type
@@ -23,7 +27,7 @@ class Rule::ConditionFilter
   end
 
   def key
-    self.class.name.demodulize.underscore
+    self.class.key
   end
 
   def label

@@ -11,26 +11,24 @@
         <%= render DS::Disclosure.new(title: t(".transactions_section"), open: true) do %>
           <div class="space-y-2">
             <%= form.text_field :name, label: t(".name_label"), placeholder: t(".name_placeholder") %>
-            <%= form.collection_select :category_id, Current.family.categories.alphabetically, :id, :name, { prompt: t(".category_prompt"), label: t(".category_label"), class: "text-subdued" } %>
-            <%= form.collection_select :merchant_id,
-                Current.family.available_merchants_for(Current.user).alphabetically,
-                :id, :name,
-                { prompt: t(".category_prompt"),
-                  include_blank: t(".none"),
-                  label: t(".merchant_label"),
-                  variant: :logo,
-                  searchable: true,
-                  menu_placement: :auto }
-             %>
+            <%= form.collection_select :category_id, Current.family.categories.alphabetically_by_hierarchy, :id, :name, { prompt: t(".category_prompt"), label: t(".category_label"), class: "text-subdued", variant: :badge, searchable: true } %>
+            <%= render DS::MerchantSelect.new(
+              form: form,
+              method: :merchant_id,
+              merchants: Current.family.available_merchants_for(Current.user).alphabetically,
+              selected_id: nil,
+              include_blank: t(".none"),
+              label: t(".merchant_label")
+            ) %>
             <%= render DS::MultiSelectTags.new(
-                  form: form,
-                  method: :tag_ids,
-                  tags: Current.family.tags.alphabetically,
-                  selected_ids: [],
-                  label: t(".tags_label"),
-                  disabled: false,
-                ) 
-            %>
+              form: form,
+              method: :tag_ids,
+              tags: Current.family.tags.alphabetically,
+              selected_ids: [],
+              label: t(".tags_label"),
+              disabled: false,
+            )
+            %>            
             <%= form.text_area :notes, label: t(".notes_label"), placeholder: t(".notes_placeholder"), rows: 2 %>
           </div>
         <% end %>
