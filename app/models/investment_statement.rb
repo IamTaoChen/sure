@@ -62,9 +62,10 @@ class InvestmentStatement
   end
 
   def holding_weight(holding)
-    return nil unless holding.present?
-    return 0 if portfolio_value.zero?
-    convert_to_family_currency(holding.amount, holding.currency) / portfolio_value * 100
+    return 0 unless holding.present?
+    return 0 if portfolio_value.nil? || portfolio_value <= 0
+    current_holding_value = holdings_value_money || 0
+    (current_holding_value.to_f / portfolio_value.to_f) * 100
   end
 
   # All current holdings across investment accounts. Holdings are returned in
