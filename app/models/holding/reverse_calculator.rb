@@ -77,9 +77,9 @@ class Holding::ReverseCalculator
           currency: price.currency,
           amount: qty * price.price,
           cost_basis: cost_basis_for(security_id, date),
-          cost_basis_unknown: transferred_by?(security_id, date)
+          cost_basis_unknown: transferred_by?(security_id, date),
           cost_basis: cost_basis_for(security_id, date),
-          cost_basis_unknown: transferred_by?(security_id, date)
+          cost_basis_unknown: transferred_by?(security_id, date),
         )
       end.compact
     end
