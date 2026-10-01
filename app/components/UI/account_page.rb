@@ -20,6 +20,10 @@ class UI::AccountPage < ApplicationComponent
     @as_of = as_of
     @active_tab = active_tab
     @chart_currency = chart_currency
+    @statement_coverage = statement_coverage
+    @statements = statements
+    @reconciliation_statuses = reconciliation_statuses
+    @can_manage_statements = can_manage_statements
   end
 
   def id

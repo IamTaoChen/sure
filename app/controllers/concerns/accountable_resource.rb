@@ -24,7 +24,6 @@ module AccountableResource
   end
 
   def show
-    Rails.logger.error("Tau - Showing account #{@account.id} with params: #{params.to_unsafe_h}")
     @chart_view = params[:chart_view] || "balance"
     @chart_currency = params[:chart_currency]
     @q = params.fetch(:q, {}).permit(:search)

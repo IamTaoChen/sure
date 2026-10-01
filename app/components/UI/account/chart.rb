@@ -170,10 +170,6 @@ class UI::Account::Chart < ApplicationComponent
     @currency ||= account.currency
   end
 
-  def currency
-    @currency ||= account.currency
-  end
-
   # Read by the trend, its comparison label and the chart mount; built once.
   def series
     @series ||= account.balance_series(period: period, view: view, currency: currency)
