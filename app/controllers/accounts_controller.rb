@@ -82,6 +82,7 @@ class AccountsController < ApplicationController
 
   def show
     @chart_view = params[:chart_view] || "balance"
+    @chart_currency = params[:chart_currency]
     @tab = params[:tab]
     # One reference date for everything on the page that is date-sensitive:
     # the chart, its projection, the cards and the Schedule tab. Read

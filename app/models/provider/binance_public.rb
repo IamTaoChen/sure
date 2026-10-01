@@ -20,7 +20,7 @@ class Provider::BinancePublic < Provider
   # dollar quote and is surfaced to users as USD. GBP is absent because
   # Binance has zero GBP trading pairs today; GBP-family users fall back to
   # USDT->USD via the app's FX conversion, same as HUF/CZK/PLN users.
-  SUPPORTED_QUOTES = %w[USDT EUR JPY BRL TRY].freeze
+  SUPPORTED_QUOTES = %w[USDT EUR JPY BRL TRY CNY].freeze
 
   # Binance quote asset -> user-facing currency & ticker suffix.
   QUOTE_TO_CURRENCY = {
@@ -28,6 +28,7 @@ class Provider::BinancePublic < Provider
     "EUR"  => "EUR",
     "JPY"  => "JPY",
     "BRL"  => "BRL",
+    "CNY"  => "CNY",
     "TRY"  => "TRY"
   }.freeze
 

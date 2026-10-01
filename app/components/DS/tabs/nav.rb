@@ -37,9 +37,15 @@ class DS::Tabs::Nav < DesignSystemComponent
   def initialize(active_tab:, dom_prefix:, classes: nil, active_btn_classes: nil, inactive_btn_classes: nil, btn_classes: nil)
     @active_tab = active_tab
     @dom_prefix = dom_prefix
-    @classes = classes
+    @classes = class_names(
+      "inline-flex bg-surface-inset p-1 rounded-lg max-w-fit",
+      classes
+    )
     @active_btn_classes = active_btn_classes
     @inactive_btn_classes = inactive_btn_classes
-    @btn_classes = btn_classes
+    @btn_classes = class_names(
+      "inline-flex justify-center items-center whitespace-nowrap px-6 py-1 rounded-md motion-safe:transition-colors motion-safe:duration-200",
+      btn_classes
+    )
   end
 end

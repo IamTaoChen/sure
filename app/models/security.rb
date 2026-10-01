@@ -129,7 +129,7 @@ class Security < ApplicationRecord
   # is the Binance ISO MIC — when we add a second crypto provider, extend
   # this check rather than duplicating the test at every call site.
   def crypto?
-    exchange_operating_mic == Provider::BinancePublic::BINANCE_MIC
+    exchange_operating_mic == Provider::BinancePublic::BINANCE_MIC || ticker&.start_with?("CRYPTO:")
   end
 
   # Strips the display-currency suffix from a crypto ticker (BTCUSD -> BTC,

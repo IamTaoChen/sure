@@ -7,7 +7,7 @@ class BinanceAccount::SecurityResolver
   EXCHANGE_MIC = "XBNC"
 
   def self.resolve(ticker, symbol)
-    result = Security::Resolver.new(ticker).resolve
+    result = Security::Resolver.new(ticker, exchange_operating_mic: EXCHANGE_MIC).resolve
     if result.nil?
       Rails.logger.debug "BinanceAccount::SecurityResolver - primary resolver returned nil for #{ticker}"
     end

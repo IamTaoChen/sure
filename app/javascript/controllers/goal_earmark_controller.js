@@ -20,6 +20,7 @@ export default class extends Controller {
     prorata: String,
     headroom: String,
     wholeBalanceAlone: String,
+    wholeBalanceAlone: String,
   }
 
   // A complete number, optionally with one decimal separator and digits after

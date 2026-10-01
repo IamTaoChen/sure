@@ -1,5 +1,8 @@
 <%# locals: (entry:) %>
-<% transaction = entry.entryable %>
+<% 
+  transaction = entry.entryable
+  logo_url = transaction.merchant&.logo_url.presence 
+%>
 
 <div class="group flex lg:grid lg:grid-cols-12 items-center text-sm font-medium p-3 lg:p-4 opacity-50 text-secondary"
      data-controller="clickable-row"

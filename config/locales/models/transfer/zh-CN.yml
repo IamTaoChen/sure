@@ -18,5 +18,7 @@ zh-CN:
           opposite_amounts: 金额必须方向相反
           within_days: 必须在 %{count} 天内
   transfer:
-    name: 转账至 %{to_account}
-    payment_name: 付款至 %{to_account}
+    name: 转账至%{to_account}
+    from: 来自%{from_account}的转账
+    payment_name: 付款至%{to_account}
+    payment_from: 来自%{from_account}的付款

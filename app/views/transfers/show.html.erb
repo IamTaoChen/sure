@@ -12,7 +12,7 @@
           <%= icon "arrow-left-right", size: "sm", class: "text-secondary" %>
         </h3>
         <span class="text-sm text-secondary">
-          <%= @transfer.name %>
+          <%= localized_transfer_name(@entry, @transfer) %>
         </span>
       </div>
       <%= dialog.close_button %>

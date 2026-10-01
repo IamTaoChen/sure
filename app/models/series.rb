@@ -10,7 +10,7 @@ class Series
     values.each(&block)
   end
 
-  attr_reader :start_date, :end_date, :interval, :trend, :values, :favorable_direction
+  attr_reader :start_date, :end_date, :interval, :trend, :values, :favorable_direction, :init_value
 
   Value = Struct.new(
     :date,
@@ -33,7 +33,7 @@ class Series
         start_date: start_date,
         end_date: end_date,
         interval: interval,
-        values: [ nil, *ordered ].each_cons(2).map do |prev_value, curr_value|
+        values: [ @init_value, *ordered ].each_cons(2).map do |prev_value, curr_value|
           Value.new(
             date: curr_value[:date],
             date_formatted: I18n.l(curr_value[:date], format: :long),
@@ -48,12 +48,13 @@ class Series
     end
   end
 
-  def initialize(start_date:, end_date:, interval:, values:, favorable_direction: "up")
+  def initialize(start_date:, end_date:, interval:, values:, favorable_direction: "up", init_value: nil)
     @start_date = start_date
     @end_date = end_date
     @interval = interval
     @values = values
     @favorable_direction = favorable_direction
+    @init_value = init_value
   end
 
   # Rounded like the serialized values: this trend is only ever rendered next to

@@ -705,7 +705,7 @@ class TransactionsController < ApplicationController
     def search_params
       cleaned_params = params.fetch(:q, {})
               .permit(
-                :start_date, :end_date, :search, :amount,
+                :start_date, :end_date, :search, :amount, :period,
                 :amount_operator, :active_accounts_only,
                 accounts: [], account_ids: [],
                 categories: [], merchants: [], types: [], tags: [], status: [], ai_status: []
@@ -843,5 +843,21 @@ class TransactionsController < ApplicationController
       end
 
       [ qty, price ]
+    end
+
+    def pure_search_range!
+      current_period = @q[:period]
+      last_period = session[:last_period]
+
+      period_changed = current_period.present? && current_period != last_period
+      if period_changed
+        @q.delete(:start_date)
+        @q.delete(:end_date)
+        session[:last_period] = current_period
+      elsif @q[:start_date].present? || @q[:end_date].present?
+        @q.delete(:period)
+        session[:last_period] = nil
+      end
+
     end
 end

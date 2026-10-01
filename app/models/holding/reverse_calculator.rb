@@ -78,6 +78,8 @@ class Holding::ReverseCalculator
           amount: qty * price.price,
           cost_basis: cost_basis_for(security_id, date),
           cost_basis_unknown: transferred_by?(security_id, date)
+          cost_basis: cost_basis_for(security_id, date),
+          cost_basis_unknown: transferred_by?(security_id, date)
         )
       end.compact
     end
@@ -149,6 +151,11 @@ class Holding::ReverseCalculator
 
     def transferred_by?(security_id, date)
       @unknown_spans[security_id].any? { |start, stop| start <= date && (stop.nil? || date < stop) }
+    end
+
+    def transferred_by?(security_id, date)
+      first = @first_transfer_dates[security_id]
+      first.present? && first <= date
     end
 
     def cost_basis_for(security_id, date)

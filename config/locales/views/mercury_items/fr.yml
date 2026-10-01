@@ -16,6 +16,7 @@ fr:
       service_down_desc: L'API Mercury peut être temporairement indisponible
       service_down_label: Service en panne
       title: Erreur de connexion Mercury
+      title: Erreur de connexion Mercury
       unable_to_connect: Impossible de se connecter à Mercury
     complete_account_setup:
       all_skipped: Tous les comptes ont été ignorés. Aucun compte n'a été créé.

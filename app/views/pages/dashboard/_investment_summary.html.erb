@@ -51,14 +51,14 @@
                       </div>
                     <% end %>
                     <div class="max-w-32">
-                      <p class="font-medium truncate"><%= holding.ticker %></p>
+                      <p class="font-medium truncate"><%= holding.name %></p>
                       <p class="text-xs text-secondary"><%= truncate(holding.name, length: 20) %></p>
                     </div>
                   </div>
                 </td>
 
                 <td class="p-4 text-right text-secondary privacy-sensitive">
-                  <%= number_to_percentage(holding.weight || 0, precision: 1) %>
+                  <%= number_to_percentage(investment_statement.holding_weight(holding) || 0, precision: 1) %>
                 </td>
 
                 <td class="p-4 text-right privacy-sensitive">

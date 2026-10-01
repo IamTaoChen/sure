@@ -9,11 +9,12 @@ class UI::Account::Chart < ApplicationComponent
   # other account type takes the branch it always took.
   # The page's reference date travels inside the payload (`today`), so the
   # component takes no date of its own.
-  def initialize(account:, period: nil, view: nil, loan_chart: nil)
+  def initialize(account:, period: nil, view: nil, loan_chart: nil, currency: nil)
     @account = account
     @period = period
     @view = view
     @loan_chart = loan_chart
+    @currency = currency
   end
 
   def loan_chart?
@@ -69,6 +70,7 @@ class UI::Account::Chart < ApplicationComponent
   # not-converged notice instead.
   def loan_interest_saved_money
     Money.new(loan_chart[:interest_saved].to_f, loan_chart[:currency])
+    @currency = currency
   end
 
   def period
@@ -164,9 +166,17 @@ class UI::Account::Chart < ApplicationComponent
     @view ||= "balance"
   end
 
+  def currency
+    @currency ||= account.currency
+  end
+
+  def currency
+    @currency ||= account.currency
+  end
+
   # Read by the trend, its comparison label and the chart mount; built once.
   def series
-    @series ||= account.balance_series(period: period, view: view)
+    @series ||= account.balance_series(period: period, view: view, currency: currency)
   end
 
   # Current total unrealized gains, taken from the series so the main indicator
