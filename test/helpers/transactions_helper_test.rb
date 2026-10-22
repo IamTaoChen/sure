@@ -2,6 +2,38 @@ require "test_helper"
 require "ostruct"
 
 class TransactionsHelperTest < ActionView::TestCase
+  test "localizes transfer names from both entry perspectives" do
+    transfer = transfers(:one)
+
+    I18n.with_locale(:en) do
+      assert_equal "Transfer to #{transfer.to_account.name}", localized_transfer_name(transfer.outflow_transaction.entry, transfer)
+      assert_equal "Transfer from #{transfer.from_account.name}", localized_transfer_name(transfer.inflow_transaction.entry, transfer)
+    end
+
+    I18n.with_locale(:"zh-CN") do
+      assert_equal "转账至#{transfer.to_account.name}", localized_transfer_name(transfer.outflow_transaction.entry, transfer)
+      assert_equal "来自#{transfer.from_account.name}的转账", localized_transfer_name(transfer.inflow_transaction.entry, transfer)
+    end
+  end
+
+  test "localizes payment names from both entry perspectives" do
+    transfer = transfers(:one)
+    transfer.inflow_transaction.entry.account = accounts(:credit_card)
+
+    I18n.with_locale(:en) do
+      assert_equal "Payment to #{transfer.to_account.name}", localized_transfer_name(transfer.outflow_transaction.entry, transfer)
+      assert_equal "Payment from #{transfer.from_account.name}", localized_transfer_name(transfer.inflow_transaction.entry, transfer)
+    end
+  end
+
+  test "preserves the entry name without a matching transfer" do
+    transfer = transfers(:one)
+    entry = Entry.new(name: "Original name")
+
+    assert_equal entry.name, localized_transfer_name(entry, nil)
+    assert_equal entry.name, localized_transfer_name(entry, transfer)
+  end
+
   # build_transaction_extra_details reads `extra` off a Transaction (or anything
   # that responds to :transaction), so a struct is enough to drive it.
   def transaction_with(extra)

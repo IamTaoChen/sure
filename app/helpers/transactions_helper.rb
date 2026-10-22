@@ -1,4 +1,20 @@
 module TransactionsHelper
+  # Returns the localized transfer name from the given entry's perspective.
+  def localized_transfer_name(entry, transfer)
+    return entry.name unless transfer.present?
+
+    inflow_entry_id = transfer.inflow_transaction&.entry&.id
+    outflow_entry_id = transfer.outflow_transaction&.entry&.id
+
+    if entry.id == inflow_entry_id
+      t(transfer.payment? ? "transfer.payment_from" : "transfer.from", from_account: transfer.from_account&.name || "")
+    elsif entry.id == outflow_entry_id
+      t(transfer.payment? ? "transfer.payment_name" : "transfer.name", to_account: transfer.to_account&.name || "")
+    else
+      entry.name
+    end
+  end
+
   # @return [Array<Hash>] the filters offered above the transaction list, each
   #   with the key its partial is named for, a translated label and an icon
   def transaction_search_filters
