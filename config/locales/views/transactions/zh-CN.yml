@@ -314,6 +314,7 @@ zh-CN:
         greater_than: 大于
         less_than: 小于
       form:
+        period: 时间范围
         toggle_selection_checkboxes: 切换所有复选框
         search_placeholder: 搜索交易...
         filter: 筛选

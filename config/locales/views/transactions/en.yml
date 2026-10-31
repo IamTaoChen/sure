@@ -384,6 +384,7 @@ en:
         greater_than: greater than
         less_than: less than
       form:
+        period: Period
         toggle_selection_checkboxes: Toggle all checkboxes
         search_placeholder: "Search transactions ..."
         filter: "Filter"

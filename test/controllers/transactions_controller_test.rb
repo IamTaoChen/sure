@@ -9,6 +9,19 @@ class TransactionsControllerTest < ActionDispatch::IntegrationTest
     @entry = entries(:transaction)
   end
 
+  test "dev period shortcut replaces dates and custom dates clear the selected shortcut" do
+    get transactions_url(q: { period: "last_30_days", start_date: "2026-01-01", search: "Retained" })
+    assert_response :success
+    assert_select "input[name='q[period]'][value='last_30_days']"
+    assert_select "input[name='q[start_date]'][value='2026-01-01']", count: 0
+    assert_select "input[name='q[search]'][value='Retained']"
+
+    get transactions_url(q: { period: "last_30_days", start_date: "2026-01-01", search: "Retained" })
+    assert_response :success
+    assert_select "input[name='q[period]'][value='last_30_days']", count: 0
+    assert_select "input[name='q[start_date]'][value='2026-01-01']"
+  end
+
   # Bills has always linked out to transactions. Until now nothing linked back,
   # so a transaction that settled a bill was a dead end. The link-back is part
   # of the preview-gated bills surface, so the viewer needs the flag.

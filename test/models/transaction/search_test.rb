@@ -13,6 +13,14 @@ class Transaction::SearchTest < ActiveSupport::TestCase
     @family.accounts.each { |account| account.entries.delete_all }
   end
 
+  test "dev period shortcut resolves to its date range" do
+    search = Transaction::Search.new(@family, filters: { period: "last_30_days", search: "Retained" })
+
+    assert_equal Period.last_30_days.start_date.iso8601, search.start_date
+    assert_equal Period.last_30_days.end_date.iso8601, search.end_date
+    assert_equal "Retained", search.search
+  end
+
   test "search filters by transaction types using kind enum" do
     # Create different types of transactions using the helper method
     standard_entry = create_transaction(
