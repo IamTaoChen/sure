@@ -61,6 +61,11 @@ class InvestmentStatement
     Money.new(holdings_value, family.currency)
   end
 
+  def holding_weight(holding)
+    return 0 unless holding.present?
+    (holding.amount / holdings_value_money) * 100
+  end
+
   # All current holdings across investment accounts. Holdings are returned in
   # their native currency; callers that aggregate across accounts must convert
   # to family currency via convert_to_family_currency.

@@ -7,6 +7,16 @@ class InvestmentStatementTest < ActiveSupport::TestCase
     @statement = InvestmentStatement.new(@family, user: nil)
   end
 
+  test "holding_weight uses invested value excluding cash" do
+    account = create_investment_account(balance: 10_000, cash_balance: 4000)
+    Holding.create!(account: account, security: securities(:aapl), date: Date.current,
+      qty: 30, price: 200, amount: 6000, currency: "USD")
+
+    holding = @statement.top_holdings.first
+    assert_equal 100, @statement.holding_weight(holding)
+    assert_equal 0, @statement.holding_weight(nil)
+  end
+
   test "portfolio_value and cash_balance with a single-currency family" do
     create_investment_account(balance: 1000, cash_balance: 100)
 
