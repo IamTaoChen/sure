@@ -25,6 +25,7 @@ module AccountableResource
 
   def show
     @chart_view = params[:chart_view] || "balance"
+    @chart_currency = params[:chart_currency]
     @q = params.fetch(:q, {}).permit(:search)
     entries = @account.entries.search(@q).reverse_chronological
 

@@ -70,29 +70,29 @@ class Balance::ChartSeriesBuilder
       @interval || period.interval
     end
 
-    # Builds a balance series for a balance column and its matching start column.
     def build_series_for(column)
+      query_data
+      init_value = Money.new(@prev_day_record.send(column), currency)
+      previous_value = init_value
       values = query_data.map do |datum|
         if @strict_currency_conversion && datum[:missing_currency].present?
           raise Money::ConversionError.new(from_currency: datum[:missing_currency], to_currency: currency, date: datum.date)
         end
-        # Map column names to their start equivalents
-        previous_column = case column
-        when :end_balance then :start_balance
-        when :end_cash_balance then :start_cash_balance
-        when :end_holdings_balance then :start_holdings_balance
-        end
+        current_value = Money.new(datum.send(column), currency)
 
-        Series::Value.new(
+        series_value = Series::Value.new(
           date: datum.date,
           date_formatted: Series.format_date(datum.date),
-          value: Money.new(datum.send(column), currency),
+          value: current_value,
           trend: Trend.new(
-            current: Money.new(datum.send(column), currency),
-            previous: Money.new(datum.send(previous_column), currency),
+            current: current_value,
+            previous: previous_value || current_value,
             favorable_direction: favorable_direction
           )
         )
+
+        previous_value = current_value
+        series_value
       end
 
       Series.new(
@@ -100,13 +100,21 @@ class Balance::ChartSeriesBuilder
         end_date: period.end_date,
         interval: interval,
         values: values,
-        favorable_direction: favorable_direction
+        favorable_direction: favorable_direction,
+        init_value: init_value
       )
     end
 
     def query_data
-      @query_data ||= Balance.find_by_sql([
-        query,
+      return @query_data if defined?(@query_data)
+      raw_data = fetch_query_data(add_prev_day: true)
+      @prev_day_record = raw_data.first
+      @query_data = raw_data.drop(1)
+    end
+
+    def fetch_query_data(add_prev_day: false)
+      Balance.find_by_sql([
+        query(add_prev_day: add_prev_day),
         {
           account_ids: account_ids,
           target_currency: currency,
@@ -153,12 +161,13 @@ class Balance::ChartSeriesBuilder
       @strict_currency_conversion ? "CASE WHEN accounts.currency = :target_currency THEN 1 WHEN er.rate > 0 THEN er.rate END" : "COALESCE(er.rate, 1)"
     end
 
-    def query
+    def query(add_prev_day: false)
       <<~SQL
         WITH dates AS (
           SELECT generate_series(DATE :start_date, DATE :end_date, :interval::interval)::date AS date
           UNION DISTINCT
           SELECT :end_date::date  -- Ensure end date is included
+          #{"UNION DISTINCT SELECT (:start_date::date - 1)" if add_prev_day}
         ),
         account_windows AS (
           SELECT

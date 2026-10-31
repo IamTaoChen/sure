@@ -6,6 +6,21 @@ class Balance::ChartSeriesBuilderTest < ActiveSupport::TestCase
   setup do
   end
 
+  test "dev balance trends compare the previous plotted close" do
+    account = accounts(:depository)
+    account.balances.destroy_all
+    create_balance(account: account, date: 2.days.ago.to_date, balance: 50)
+    create_balance(account: account, date: 1.day.ago.to_date, balance: 100)
+    create_balance(account: account, date: Date.current, balance: 120)
+    series = Balance::ChartSeriesBuilder.new(
+      account_ids: [ account.id ], currency: "USD",
+      period: Period.custom(start_date: 1.day.ago.to_date, end_date: Date.current)
+    ).balance_series
+
+    assert_equal [ 50, 100 ], series.map { |point| point.trend.previous.amount }
+    assert_equal Money.new(50, "USD"), series.init_value
+  end
+
   test "balance series with fallbacks and gapfills" do
     account = accounts(:depository)
     account.balances.destroy_all
@@ -99,7 +114,7 @@ class Balance::ChartSeriesBuilderTest < ActiveSupport::TestCase
     series = builder.balance_series
     assert_equal 1, series.size
     assert_equal(-50, series.first.value.amount)
-    assert_equal(-50, series.first.trend.previous.amount)
+    assert_equal 0, series.first.trend.previous.amount
   end
 
   test "strict currency conversion uses historical rates without changing native balances" do

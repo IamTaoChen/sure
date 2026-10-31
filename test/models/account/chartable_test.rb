@@ -1,6 +1,19 @@
 require "test_helper"
 
 class Account::ChartableTest < ActiveSupport::TestCase
+  test "supports the dev chart currency parameter" do
+    account = accounts(:depository)
+    builder = mock
+    result = mock
+    Balance::ChartSeriesBuilder.expects(:new).with(
+      account_ids: [ account.id ], currency: "EUR", period: Period.last_30_days,
+      favorable_direction: account.favorable_direction, interval: nil
+    ).returns(builder)
+    builder.expects(:balance_series).returns(result)
+
+    assert_same result, account.balance_series(currency: "EUR")
+  end
+
   test "generates series and memoizes" do
     account = accounts(:depository)
 

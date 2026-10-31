@@ -18,6 +18,13 @@
     </div>
 
     <div class="flex items-center gap-2">
+      <% if foreign_currency? %>
+        <%= form_with url: account_path(account), method: :get, data: { controller: "auto-submit-form" } do |form| %>
+          <%= render DS::Select.new(form: form, method: :chart_currency,
+                items: [account.currency, account.family.currency].map { |code| { value: code, label: code } },
+                selected: currency) %>
+        <% end %>
+      <% end %>
       <% if account.supports_trades? %>
         <%= form_with url: account_path(account), method: :get, data: { controller: "auto-submit-form" } do |form| %>
           <%= form.select :chart_view,

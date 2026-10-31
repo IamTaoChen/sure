@@ -8,7 +8,7 @@ module Account::Chartable
 
   # Returns the chart Series for this account over the given period.
   # Supported views: :balance, :cash_balance, :holdings_balance, :gains.
-  def balance_series(period: Period.last_30_days, view: :balance, interval: nil)
+  def balance_series(period: Period.last_30_days, view: :balance, interval: nil, currency: nil)
     raise ArgumentError, "Invalid view type" unless [ :balance, :cash_balance, :holdings_balance, :gains ].include?(view.to_sym)
 
     @balance_series ||= {}
@@ -17,7 +17,7 @@ module Account::Chartable
 
     builder = (@balance_series[memo_key] ||= Balance::ChartSeriesBuilder.new(
       account_ids: [ id ],
-      currency: self.currency,
+      currency: currency ||= self.currency,
       period: period,
       favorable_direction: favorable_direction,
       interval: interval
