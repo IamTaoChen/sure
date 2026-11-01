@@ -593,8 +593,28 @@ class Balance::ReverseCalculatorTest < ActiveSupport::TestCase
     )
   end
 
+  test "other liabilities reconstruct borrowing and repayments from the current balance" do
+    account = create_account_with_ledger(
+      account: { type: OtherLiability, balance: 13000, cash_balance: 0, currency: "USD" },
+      entries: [
+        { type: "current_anchor", date: Date.current, balance: 13000 },
+        { type: "transaction", date: 1.day.ago.to_date, amount: -2000 },
+        { type: "transaction", date: 2.days.ago.to_date, amount: 5000 }
+      ]
+    )
+
+    calculated = Balance::ReverseCalculator.new(account).calculate.index_by(&:date)
+
+    assert_equal 13000, calculated.fetch(Date.current).balance
+    assert_equal 15000, calculated.fetch(1.day.ago.to_date).start_non_cash_balance
+    assert_equal 10000, calculated.fetch(2.days.ago.to_date).start_non_cash_balance
+    assert_equal 2000, calculated.fetch(1.day.ago.to_date).non_cash_inflows
+    assert_equal 5000, calculated.fetch(2.days.ago.to_date).non_cash_outflows
+    assert calculated.values.all? { |row| row.cash_balance.zero? }
+  end
+
   test "non cash accounts can only use valuations and transactions will be recorded but ignored for balance calculation" do
-    [ Property, Vehicle, OtherAsset, OtherLiability ].each do |account_type|
+    [ Property, Vehicle, OtherAsset ].each do |account_type|
       account = create_account_with_ledger(
         account: { type: account_type, balance: 1000, cash_balance: 0, currency: "USD" },
         entries: [

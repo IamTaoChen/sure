@@ -473,8 +473,30 @@ class Balance::ForwardCalculatorTest < ActiveSupport::TestCase
     )
   end
 
+  test "other liabilities apply borrowing and repayments while respecting reconciliations" do
+    account = create_account_with_ledger(
+      account: { type: OtherLiability, currency: "USD" },
+      entries: [
+        { type: "opening_anchor", date: 5.days.ago.to_date, balance: 10000 },
+        { type: "transaction", date: 4.days.ago.to_date, amount: 5000 },
+        { type: "transaction", date: 3.days.ago.to_date, amount: -2000 },
+        { type: "reconciliation", date: 2.days.ago.to_date, balance: 12000 },
+        { type: "transaction", date: 1.day.ago.to_date, amount: -1000 }
+      ]
+    )
+
+    calculated = Balance::ForwardCalculator.new(account).calculate.sort_by(&:date)
+
+    assert_equal [ 10000, 15000, 13000, 12000, 11000 ], calculated.map(&:balance)
+    assert calculated.all? { |row| row.cash_balance.zero? && row.cash_inflows.zero? && row.cash_outflows.zero? }
+    assert_equal 5000, calculated[1].non_cash_outflows
+    assert_equal 2000, calculated[2].non_cash_inflows
+    assert_equal(-1000, calculated[3].non_cash_adjustments)
+    assert_equal 0, calculated.last.non_cash_adjustments
+  end
+
   test "non cash accounts can only use valuations and transactions will be recorded but ignored for balance calculation" do
-    [ Property, Vehicle, OtherAsset, OtherLiability ].each do |account_type|
+    [ Property, Vehicle, OtherAsset ].each do |account_type|
       account = create_account_with_ledger(
         account: { type: account_type, currency: "USD" },
         entries: [

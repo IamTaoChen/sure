@@ -14,6 +14,22 @@ class Balance::MaterializerTest < ActiveSupport::TestCase
     )
   end
 
+  test "other liability repayment updates the balance without breaking its transfer" do
+    debt = @account.family.accounts.create!(name: "Personal debt", currency: "USD", balance: 10000, accountable: OtherLiability.new)
+    debt.set_opening_anchor_balance(balance: 10000, date: 2.days.ago.to_date)
+    bank = @account.family.accounts.create!(name: "Bank", currency: "USD", balance: 20000, accountable: Depository.new)
+    transfer = Transfer::Creator.new(family: debt.family, source_account_id: bank.id,
+      destination_account_id: debt.id, date: Date.current, amount: 2000).create
+    transaction_ids = [ transfer.outflow_transaction_id, transfer.inflow_transaction_id ]
+
+    Balance::Materializer.new(debt, strategy: :forward).materialize_balances
+
+    assert_equal 8000, debt.reload.balance
+    assert_equal transaction_ids, [ transfer.reload.outflow_transaction_id, transfer.inflow_transaction_id ]
+    assert_equal "cc_payment", transfer.outflow_transaction.reload.kind
+    assert_equal "funds_movement", transfer.inflow_transaction.reload.kind
+  end
+
   test "syncs balances" do
     Holding::Materializer.any_instance.expects(:materialize_holdings).returns([]).once
 
